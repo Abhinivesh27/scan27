@@ -9,5 +9,5 @@ It Scans a Host for Open Ports
 ./scan27-V2 Hostname
 
 # note: 
-*By default ports are scanned between the range of 0 to 65000, you may change this in scan27 source file 
-*Scan a Host Multiple times for IDLE results
+* By default ports are scanned between the range of 0 to 65000, you may change this in scan27 source file 
+* Scan a Host Multiple times for IDLE results
