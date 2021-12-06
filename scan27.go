@@ -1,37 +1,54 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net"
+	"sync"
+	"time"
 )
 
 func main() {
 	art :=
 		`
-
   _________                      ________   _________ 
  /   _____/ ____ _____    ____   \_____  \  \______  \
  \_____  \_/ ___\\__  \  /    \   /  ____/      /    /
  /        \  \___ / __ \|   |  \ /       \     /    / 
 /_______  /\___  >____  /___|  / \_______ \   /____/  
-        \/     \/     \/     \/          \/           by Abhinivesh
-
+        \/     \/     \/     \/          \/          
+						 v2.0
+						 by Abhinivesh
 `
 	fmt.Println(art)
-	var input string
-	fmt.Print("Enter IP address or Host name: ")
-	fmt.Scanln(&input)
-	fmt.Print("\033[H\033[2J")
-	fmt.Printf("Open Ports in %s are listed below\n", input)
-	for i := 1; 1 <= 1000; i++ {
-		go func(j int) {
-			address := fmt.Sprintf("%s:%d", input, j)
-			conn, err := net.Dial("tcp", address)
-			if err != nil {
-				return
+	Scan()
+}
+func Scan() {
+	hostname := flag.String("hostname", "google.com", "hostname to test")
+	ports := []int{}
+	wg := &sync.WaitGroup{}
+	mutex := &sync.Mutex{}
+	timeout := time.Millisecond * 6000
+	for port := 1; port < 65000; port++ {
+		wg.Add(1)
+		go func(p int) {
+			opened := ScanIt(*hostname, p, timeout)
+			if opened == true {
+				mutex.Lock()
+				ports = append(ports, p)
+				mutex.Unlock()
 			}
-			conn.Close()
-			fmt.Printf("%d open\n", j)
-		}(i)
+			wg.Done()
+		}(port)
 	}
+	wg.Wait()
+	fmt.Printf("Opened Ports: %v\n", ports)
+}
+func ScanIt(host string, port int, timeout time.Duration) bool {
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", host, port), timeout)
+	if err == nil {
+		_ = conn.Close()
+		return true
+	}
+	return false
 }
